@@ -241,7 +241,9 @@ fn main() {
         configz.set("file", Configz::file(lua_ctx)).unwrap();
         configz.set("link", Configz::link(lua_ctx)).unwrap();
         configz.set("download", Configz::download(lua_ctx)).unwrap();
-        configz.set("directory", Configz::directory(lua_ctx)).unwrap();
+        configz
+            .set("directory", Configz::directory(lua_ctx))
+            .unwrap();
         configz.set("run", Configz::run(lua_ctx)).unwrap();
 
         // HELPERS
