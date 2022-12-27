@@ -1,0 +1,6 @@
+git:
+  provider: github
+  project: AdeAttwood/Configz
+assets: [".release-assets/*"]
+
+
