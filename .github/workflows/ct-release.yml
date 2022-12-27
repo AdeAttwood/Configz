@@ -1,0 +1,65 @@
+name: Conventional Tools Release
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version"
+        required: false
+
+jobs:
+  build_release:
+    name: Build Release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        target: ["arm-unknown-linux-gnueabihf", "x86_64-unknown-linux-musl"]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install rust toolchain
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
+          target: ${{ matrix.target }}
+
+      - name: Build
+        run: cargo build --release
+
+      - uses: actions/upload-artifact@v3
+        with:
+          name: ${{ matrix.target }}
+          path: target/release/configz
+
+  release:
+    name: Release
+    runs-on: ubuntu-latest
+    needs: ["build_release"]
+    container: registry.k1.zportal.co.uk/practically-oss/conventional-tools:1.x
+    env:
+      CT_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: arm-unknown-linux-gnueabihf
+          path: artifacts/configz-arm-unknown-linux-gnueabihf
+
+      - uses: actions/download-artifact@v3
+        with:
+          name: x86_64-unknown-linux-musl
+          path: artifacts/configz-x86_64-unknown-linux-musl
+
+      - name: Setup Git
+        run: |
+          git config --global user.email "github-actions[bot]@users.noreply.github.com"
+          git config --global user.name "github-actions[bot]"
+
+      - name: Release
+        run: conventional-tools release-semver ${{ github.event.inputs.version }}
