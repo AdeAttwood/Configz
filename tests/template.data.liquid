@@ -1,0 +1,9 @@
+Hello {{data.name}}!
+
+{% if data.bool_one %}Bool one is true{% endif %}
+{% if data.bool_two %}Bool two is true{% endif %}
+
+UserName: {{data.user.name}}
+UserNameLower: {{data.user.name | downcase}}
+
+List: {{data.list | join: ", " }}
