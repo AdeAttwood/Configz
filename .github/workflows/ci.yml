@@ -64,5 +64,5 @@ jobs:
         run: cargo build
 
       - name: Test
-        run: find tests -name "*.lua" | xargs ./.github/test.sh
-
+        run: find tests -name "*.lua" | xargs -n1 ./.github/test.sh
+        env: { RUST_LOG: debug }
