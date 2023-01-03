@@ -73,6 +73,18 @@ configz.run = function(command) end
 ---@return boolean, string
 configz.download = function(destination, config) end
 
+---@class TemplateConfig
+---@field source string The path to the template
+---@field data? any The data that will be available in the template
+
+--- Create a file from a given template.
+--- https://shopify.github.io/liquid/
+---
+---@param destination string
+---@param config TemplateConfig The config for the template
+---@return boolean
+configz.template = function(destination, config) end
+
 -------------------------------------------------------------------------------
 --                                HELPERS
 -------------------------------------------------------------------------------
