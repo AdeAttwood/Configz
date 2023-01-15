@@ -337,7 +337,7 @@ fn main() {
     debug!("Running module, {}", args.module);
 
     let lua = Lua::new();
-    lua.context(|lua_ctx| {
+    let result = lua.context(|lua_ctx| {
         let configz = lua_ctx.create_table().unwrap();
         let globals = lua_ctx.globals();
 
@@ -368,15 +368,16 @@ fn main() {
 
         globals.set("configz", configz).unwrap();
 
-        let result = lua_ctx
+        lua_ctx
             .load(&format!("require('{}')", args.module).to_string())
-            .exec();
+            .exec()
+    });
 
-        match result {
-            Ok(_) => {}
-            Err(err) => {
-                println!("{}", err);
-            }
+    match result {
+        Ok(_) => std::process::exit(0),
+        Err(err) => {
+            println!("{}", err);
+            std::process::exit(1)
         }
-    })
+    };
 }
