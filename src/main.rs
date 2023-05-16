@@ -2,6 +2,7 @@ use clap::Parser;
 use env_logger::{Builder, Target};
 use log::{debug, error, info};
 use rlua::{Context, Error, Function, Lua, Table, Value};
+use std::borrow;
 use std::fs;
 use std::io::Write;
 use std::os::unix;
@@ -16,6 +17,27 @@ struct Args {
     #[arg(short, long)]
     module: String,
 }
+
+#[derive(Default, Debug, Clone, Copy)]
+struct FileSystemSource;
+impl liquid::partials::PartialSource for FileSystemSource {
+    fn contains(&self, name: &str) -> bool {
+        Path::new(name).is_file()
+    }
+
+    fn names(&self) -> Vec<&str> {
+        vec![]
+    }
+
+    fn try_get<'a>(&'a self, name: &str) -> Option<borrow::Cow<'a, str>> {
+        match fs::read_to_string(name) {
+            Ok(value) => Some(value.into()),
+            Err(_) => None,
+        }
+    }
+}
+
+type Partials = liquid::partials::LazyCompiler<FileSystemSource>;
 
 struct Configz;
 
@@ -94,7 +116,8 @@ impl Configz {
                     }
                 };
 
-                let liquid = match liquid::ParserBuilder::with_stdlib().build() {
+                let liquid_build = liquid::ParserBuilder::with_stdlib().partials(Partials::empty());
+                let liquid = match liquid_build.build() {
                     Ok(value) => value,
                     Err(err) => {
                         error!("[{}] unable to build tempalte engin, {}", destination, err);

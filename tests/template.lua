@@ -41,3 +41,8 @@ assert(not content:find "Bool one is true")
 assert(content:find "UserName: The user name")
 assert(content:find "UserNameLower: the user name")
 assert(content:find "List: one, two, three")
+
+test_template("/tmp/configz/template.include.txt", { source = "tests/template.include.liquid" })
+local include_ok, include_content = read_file "/tmp/configz/template.include.txt"
+assert(include_ok)
+assert(include_content:find "INCLUDE: This is a template")
