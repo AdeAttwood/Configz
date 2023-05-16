@@ -265,14 +265,24 @@ impl Configz {
                     return Ok(false);
                 }
 
-                let response_result = reqwest::blocking::get(url_result.unwrap().clone());
-                if response_result.is_err() {
-                    error!(
-                        "[{}] failed to download '{}'",
-                        destination,
-                        response_result.unwrap_err()
-                    );
-                    return Ok(false);
+                let response_bytes = match reqwest::blocking::get(url_result.unwrap().clone()) {
+                    Ok(r) => r.bytes().unwrap(),
+                    Err(err) => {
+                        error!("[{}] failed to download '{}'", destination, err);
+                        return Ok(false);
+                    }
+                };
+
+                let sha256_result: Result<String, Error> = config.get("sha256");
+                if let Ok(sha256) = sha256_result {
+                    let checksum = sha256::digest(&*response_bytes.clone());
+                    if sha256 != checksum {
+                        error!(
+                            "[{}] checksum miss match Expected '{}' Actual '{}'",
+                            destination, sha256, checksum
+                        );
+                        return Ok(false);
+                    }
                 }
 
                 let path = Path::new(&destination);
@@ -285,9 +295,7 @@ impl Configz {
                     return Ok(false);
                 }
 
-                let result = file_result
-                    .unwrap()
-                    .write_all(&response_result.unwrap().bytes().unwrap());
+                let result = file_result.unwrap().write_all(&response_bytes);
                 match result {
                     Ok(_) => {
                         info!("[{}] downloaded successfully", destination);
