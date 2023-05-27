@@ -65,6 +65,7 @@ configz.run = function(command) end
 
 ---@class DownloadConfig
 ---@field url string The url to the file that will be downloaded
+---@field sha256? string The sha256 sum of the file you are downloading
 
 --- Download a file from a URL
 ---
