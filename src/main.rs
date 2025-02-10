@@ -5,10 +5,18 @@ use rlua::{Context, Error, Function, Lua, Table, Value};
 use std::borrow;
 use std::fs;
 use std::io::Write;
-use std::os::unix;
 use std::path::Path;
 use std::process::Command;
 use which::which;
+
+#[cfg(target_family = "windows")]
+fn windows_link(src: String, dest: String) -> std::io::Result<()> {
+    if std::fs::metadata(src.clone()).unwrap().is_dir() {
+        std::os::windows::fs::symlink_dir(src.clone(), dest.clone())
+    } else {
+        std::os::windows::fs::symlink_file(src.clone(), dest.clone())
+    }
+}
 
 #[derive(Parser, Debug)]
 #[command(version, long_about = None)]
@@ -215,7 +223,12 @@ impl Configz {
                 }
 
                 let source = source_result.unwrap();
-                let result = unix::fs::symlink(source.clone(), destination.clone());
+
+                #[cfg(target_family = "windows")]
+                let result = windows_link(source.clone(), destination.clone());
+
+                #[cfg(target_family = "unix")]
+                let result = std::os::fs::symlink(source.clone(), destination.clone());
 
                 match result {
                     Ok(_) => {
@@ -253,7 +266,12 @@ impl Configz {
     pub fn run<'lua>(context: Context<'lua>) -> Function {
         context
             .create_function(|_, command: String| {
+                #[cfg(target_family = "windows")]
+                let mut process = Command::new("pwsh");
+
+                #[cfg(target_family = "unix")]
                 let mut process = Command::new("sh");
+
                 process.arg("-c").arg(command.clone());
 
                 let result = process.output();
