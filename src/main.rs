@@ -78,7 +78,7 @@ fn to_liquid_object(input: Value) -> liquid::model::Value {
 }
 
 impl Configz {
-    pub fn debug<'lua>(context: Context<'lua>) -> Function {
+    pub fn debug<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, message: String| {
                 debug!("{}", message);
@@ -87,7 +87,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn info<'lua>(context: Context<'lua>) -> Function {
+    pub fn info<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, message: String| {
                 info!("{}", message);
@@ -96,7 +96,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn error<'lua>(context: Context<'lua>) -> Function {
+    pub fn error<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, message: String| {
                 error!("{}", message);
@@ -105,7 +105,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn template<'lua>(context: Context<'lua>) -> Function {
+    pub fn template<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, (destination, config): (String, Table)| {
                 let template_file: String = match config.get("source") {
@@ -179,7 +179,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn file<'lua>(context: Context<'lua>) -> Function {
+    pub fn file<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, (destination, config): (String, Table)| {
                 let source_result: Result<String, Error> = config.get("source");
@@ -205,7 +205,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn link<'lua>(context: Context<'lua>) -> Function {
+    pub fn link<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, (destination, config): (String, Table)| {
                 let source_result: Result<String, Error> = config.get("source");
@@ -231,7 +231,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn directory<'lua>(context: Context<'lua>) -> Function {
+    pub fn directory<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, destination: String| {
                 let result = fs::create_dir_all(destination.clone());
@@ -250,7 +250,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn run<'lua>(context: Context<'lua>) -> Function {
+    pub fn run<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, command: String| {
                 let mut process = Command::new("sh");
@@ -279,7 +279,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn download<'lua>(context: Context<'lua>) -> Function {
+    pub fn download<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, (destination, config): (String, Table)| {
                 let url_result: Result<String, Error> = config.get("url");
@@ -333,7 +333,7 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn get_executable<'lua>(context: Context<'lua>) -> Function {
+    pub fn get_executable<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, executable: String| match which(executable) {
                 Ok(path) => Ok((true, String::from(path.to_str().unwrap()))),
@@ -342,13 +342,13 @@ impl Configz {
             .unwrap()
     }
 
-    pub fn is_file<'lua>(context: Context<'lua>) -> Function {
+    pub fn is_file<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, path: String| Ok(Path::new(&path).is_file()))
             .unwrap()
     }
 
-    pub fn is_directory<'lua>(context: Context<'lua>) -> Function {
+    pub fn is_directory<'lua>(context: Context<'lua>) -> Function<'lua> {
         context
             .create_function(|_, path: String| Ok(Path::new(&path).is_dir()))
             .unwrap()
