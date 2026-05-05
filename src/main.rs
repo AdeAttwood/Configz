@@ -368,7 +368,8 @@ fn main() {
     debug!("Running module, {}", args.module);
 
     let lua = Lua::new();
-    let result = lua.context(|lua_ctx| {
+    let result = {
+        let lua_ctx = &lua;
         let configz = lua_ctx.create_table().unwrap();
         let globals = lua_ctx.globals();
 
@@ -402,7 +403,7 @@ fn main() {
         lua_ctx
             .load(&format!("require('{}')", args.module).to_string())
             .exec()
-    });
+    };
 
     match result {
         Ok(_) => std::process::exit(0),
